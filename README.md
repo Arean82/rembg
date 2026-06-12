@@ -9,40 +9,10 @@
   </div>
 </div>
 
-<br/>
-
-<p align="center">
-    <a href="https://trendshift.io/repositories/2846" target="_blank">
-        <img src="https://trendshift.io/api/badge/repositories/2846" alt="danielgatis%2Frembg | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/>
-    </a>
-</p>
-
-## Sponsors
-
-<table>
- <tr>
-    <td align="center" vertical-align="center">
-      <a href="https://photoroom.com/api/remove-background?utm_source=rembg&utm_medium=github_webpage&utm_campaign=sponsor" >
-        <img src="https://font-cdn.photoroom.com/media/api-logo.png" width="120px;" alt="Unsplash" />
-      </a>
-    </td>
-    <td align="center" vertical-align="center">
-      <b>PhotoRoom Remove Background API</b>
-      <br />
-      <a href="https://photoroom.com/api/remove-background?utm_source=rembg&utm_medium=github_webpage&utm_campaign=sponsor">https://photoroom.com/api</a>
-      <br />
-      <p width="200px">
-        Fast and accurate background remover API<br/>
-      </p>
-    </td>
-  </tr>
-</table>
-
-**If this project has helped you, please consider making a [donation](https://www.buymeacoffee.com/danielgatis).**
-
 ## Architecture
 
 This project uses an **Absolute Modular Architecture**:
+
 - `rembg/` - The core ML engine and Headless CLI.
 - `web/` - A separate Flask backend and Glassmorphic web frontend.
 - `scripts/` - Cross-platform deployment and run scripts.
@@ -66,28 +36,35 @@ pip install -e .
 ```
 
 ### Hybrid Microservice Architecture
+
 Rembg now natively supports an **Extensible Provider Pattern**. You can run the ML models locally, or instantly switch the UI/CLI to stream images over the network to a remote GPU server or third-party AI like Ollama!
 
 #### 1. Dev/Test (Local Execution)
+
 By default, if you don't set any environment variables, `web` and `headless` will load the machine learning models locally.
 
 #### 2. Production (Distributed Execution)
+
 Deploy the heavy `core/` to your GPU server and run its dedicated API:
+
 ```bash
 python -m core.server
 ```
 
 Then, on your frontend server, set the `CORE_API_URL` environment variable:
+
 - Windows (PowerShell): `$env:CORE_API_URL="http://your-gpu-server:5001/api/remove"`
 - Linux: `export CORE_API_URL="http://your-gpu-server:5001/api/remove"`
 
 When you run `headless` or `web`, they will skip loading models and instantly proxy the image over the network!
 
 #### 3. Third-Party AI Providers (Ollama)
+
 You can point the UI/CLI to an entirely different AI (like a local Ollama vision model) by switching the `AI_PROVIDER` variable.
+
 - Windows: `$env:AI_PROVIDER="ollama"`
 - Linux: `export AI_PROVIDER="ollama"`
-*(You can also set `OLLAMA_URL` if it's not running on `localhost:11434`)*
+  *(You can also set `OLLAMA_URL` if it's not running on `localhost:11434`)*
 
 ### GPU support (NVIDIA/CUDA)
 
@@ -107,7 +84,7 @@ pip install -e ".[gpu,cli]"
 
 ### GPU support (AMD/ROCm)
 
-ROCm support requires the `onnxruntime-rocm` package. Install it by following [AMD's documentation](https://rocm.docs.amd.com/projects/radeon/en/latest/docs/install/native_linux/install-onnx.html).
+ROCm support requires the `onnxruntime-rocm` package. Install it by following [AMD&#39;s documentation](https://rocm.docs.amd.com/projects/radeon/en/latest/docs/install/native_linux/install-onnx.html).
 
 Once `onnxruntime-rocm` is installed and working, install the optional ROCm dependencies:
 
@@ -237,11 +214,11 @@ rembg b <width> <height> -o <output_specifier>
 
 **Arguments:**
 
-| Argument | Description |
-|----------|-------------|
-| `width` | Width of input image(s) |
-| `height` | Height of input image(s) |
-| `output_specifier` | Printf-style specifier for output filenames (e.g., `output-%03u.png` produces `output-000.png`, `output-001.png`, etc.). Omit to write to stdout. |
+| Argument             | Description                                                                                                                                            |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `width`            | Width of input image(s)                                                                                                                                |
+| `height`           | Height of input image(s)                                                                                                                               |
+| `output_specifier` | Printf-style specifier for output filenames (e.g.,`output-%03u.png` produces `output-000.png`, `output-001.png`, etc.). Omit to write to stdout. |
 
 **Example with FFmpeg:**
 
@@ -378,12 +355,12 @@ All models are automatically downloaded and saved to `~/.u2net/` on first use.
 
 ## Environment Variables
 
-| Variable | Description |
-|----------|-------------|
-| `U2NET_HOME` | Path to the directory where models are stored. Defaults to `$XDG_DATA_HOME/.u2net` (or `~/.u2net` if `XDG_DATA_HOME` is not set). |
-| `XDG_DATA_HOME` | Base data directory used when `U2NET_HOME` is not set. Defaults to `~`. |
-| `MODEL_CHECKSUM_DISABLED` | When set (e.g. `MODEL_CHECKSUM_DISABLED=1`), disables hash verification for downloaded models. This is useful if you want to use your own custom/converted model files without rembg re-downloading the originals. |
-| `OMP_NUM_THREADS` | Sets the number of threads used by ONNX Runtime for inference. |
+| Variable                    | Description                                                                                                                                                                                                         |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `U2NET_HOME`              | Path to the directory where models are stored. Defaults to `$XDG_DATA_HOME/.u2net` (or `~/.u2net` if `XDG_DATA_HOME` is not set).                                                                             |
+| `XDG_DATA_HOME`           | Base data directory used when `U2NET_HOME` is not set. Defaults to `~`.                                                                                                                                         |
+| `MODEL_CHECKSUM_DISABLED` | When set (e.g.`MODEL_CHECKSUM_DISABLED=1`), disables hash verification for downloaded models. This is useful if you want to use your own custom/converted model files without rembg re-downloading the originals. |
+| `OMP_NUM_THREADS`         | Sets the number of threads used by ONNX Runtime for inference.                                                                                                                                                      |
 
 ### Using custom model files
 

@@ -19,8 +19,8 @@ jobs:
                   virtualenvs-in-project: true
             - name: Install dependencies
               run: poetry install --with dev --extras "cpu cli"
-            - run: poetry run mypy --install-types --non-interactive --ignore-missing-imports ./rembg
-            - run: poetry run bandit --recursive --skip B101,B104,B310,B311,B303,B110 --exclude ./rembg/_version.py ./rembg
-            - run: poetry run black --force-exclude rembg/_version.py --check --diff ./rembg
-            - run: poetry run flake8 ./rembg --count --ignore=B008,C901,E203,E266,E731,F401,F811,F841,W503,E501,E402 --show-source --statistics --exclude ./rembg/_version.py
-            - run: poetry run isort --check-only --profile black ./rembg
+            - run: poetry run mypy --install-types --non-interactive --ignore-missing-imports ./core ./headless ./web
+            - run: poetry run bandit --recursive --skip B101,B104,B310,B311,B303,B110 --exclude ./core/_version.py ./core ./headless ./web
+            - run: poetry run black --force-exclude core/_version.py --check --diff ./core ./headless ./web
+            - run: poetry run flake8 ./core ./headless ./web --count --ignore=B008,C901,E203,E266,E731,F401,F811,F841,W503,E501,E402 --show-source --statistics --exclude ./core/_version.py
+            - run: poetry run isort --check-only --profile black ./core ./headless ./web

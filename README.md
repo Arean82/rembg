@@ -1,15 +1,11 @@
 <p align="center">
-  <img src="logo.png" alt="Rembg Logo" width="600" />
+  <img src="assets/logo.png" alt="Rembg Logo" width="600" />
 </p>
 
 <div align="center">
-  <p align="center">Rembg is a tool to remove image backgrounds. It can be used as a CLI, Python library, HTTP server, or Docker container.</p>
+  <p align="center">Rembg is a tool to remove image backgrounds. It has a highly modular architecture including a core CLI, a separate Flask Web UI, and is prepared for future desktop apps.</p>
   <div style="display: flex; flex-direction: row; justify-content: center; gap: 8px; flex-wrap: wrap; margin-top: 8px;">
     <a href="https://img.shields.io/badge/License-MIT-blue.svg"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License" /></a>
-    <a href="https://huggingface.co/spaces/KenjieDec/RemBG"><img src="https://img.shields.io/badge/🤗%20Hugging%20Face-Spaces-blue" alt="Hugging Face Spaces" /></a>
-    <a href="https://bgremoval.streamlit.app/"><img src="https://img.shields.io/badge/🎈%20Streamlit%20Community-Cloud-blue" alt="Streamlit App" /></a>
-    <a href="https://colab.research.google.com/github/danielgatis/rembg/blob/main/rembg.ipynb"><img src="https://colab.research.google.com/assets/colab-badge.svg" alt="Open in Colab" /></a>
-    <a href="https://repomapr.com/danielgatis/rembg"><img src="https://img.shields.io/badge/RepoMapr-View_Interactive_Diagram-blue?style=flat&logo=github" alt="RepoMapr" /></a>
   </div>
 </div>
 
@@ -44,49 +40,79 @@
 
 **If this project has helped you, please consider making a [donation](https://www.buymeacoffee.com/danielgatis).**
 
+## Architecture
+
+This project uses an **Absolute Modular Architecture**:
+- `rembg/` - The core ML engine and Headless CLI.
+- `web/` - A separate Flask backend and Glassmorphic web frontend.
+- `scripts/` - Cross-platform deployment and run scripts.
+- `desktop/` - Reserved for future PySide6 desktop applications.
+
 ## Requirements
 
 ```text
-python: >=3.11, <3.14
+python: >=3.12
 ```
 
 ## Installation
 
-Choose **one** of the following backends based on your hardware:
-
-### CPU support
-
 ```bash
-pip install "rembg[cpu]" # for library
-pip install "rembg[cpu,cli]" # for library + cli
+# Clone the repository
+git clone https://github.com/arean82/rembg
+cd rembg
+
+# Install the modular packages (core, headless, web) globally
+pip install -e .
 ```
+
+### Hybrid Microservice Architecture
+Rembg now natively supports an **Extensible Provider Pattern**. You can run the ML models locally, or instantly switch the UI/CLI to stream images over the network to a remote GPU server or third-party AI like Ollama!
+
+#### 1. Dev/Test (Local Execution)
+By default, if you don't set any environment variables, `web` and `headless` will load the machine learning models locally.
+
+#### 2. Production (Distributed Execution)
+Deploy the heavy `core/` to your GPU server and run its dedicated API:
+```bash
+python -m core.server
+```
+
+Then, on your frontend server, set the `CORE_API_URL` environment variable:
+- Windows (PowerShell): `$env:CORE_API_URL="http://your-gpu-server:5001/api/remove"`
+- Linux: `export CORE_API_URL="http://your-gpu-server:5001/api/remove"`
+
+When you run `headless` or `web`, they will skip loading models and instantly proxy the image over the network!
+
+#### 3. Third-Party AI Providers (Ollama)
+You can point the UI/CLI to an entirely different AI (like a local Ollama vision model) by switching the `AI_PROVIDER` variable.
+- Windows: `$env:AI_PROVIDER="ollama"`
+- Linux: `export AI_PROVIDER="ollama"`
+*(You can also set `OLLAMA_URL` if it's not running on `localhost:11434`)*
 
 ### GPU support (NVIDIA/CUDA)
 
 First, check if your system supports `onnxruntime-gpu` by visiting [onnxruntime.ai](https://onnxruntime.ai/getting-started) and reviewing the installation matrix.
 
 <p style="display: flex;align-items: center;justify-content: center;">
-  <img alt="onnxruntime-installation-matrix" src="./onnxruntime-installation-matrix.png" width="400" />
+  <img alt="onnxruntime-installation-matrix" src="assets/onnxruntime-installation-matrix.png" width="400" />
 </p>
 
-If your system is compatible, run:
+If your system is compatible, install the optional GPU dependencies:
 
 ```bash
-pip install "rembg[gpu]" # for library
-pip install "rembg[gpu,cli]" # for library + cli
+pip install -e ".[gpu,cli]" 
 ```
 
-> **Note:** NVIDIA GPUs may require `onnxruntime-gpu`, CUDA, and `cudnn-devel`. See [#668](https://github.com/danielgatis/rembg/issues/668#issuecomment-2689830314) for details. If `rembg[gpu]` doesn't work and you can't install CUDA or `cudnn-devel`, use `rembg[cpu]` with `onnxruntime` instead.
+> **Note:** NVIDIA GPUs may require `onnxruntime-gpu`, CUDA, and `cudnn-devel`. See [#668](https://github.com/danielgatis/rembg/issues/668#issuecomment-2689830314) for details. If GPU processing doesn't work and you can't install CUDA or `cudnn-devel`, use standard CPU processing with `onnxruntime` instead.
 
 ### GPU support (AMD/ROCm)
 
 ROCm support requires the `onnxruntime-rocm` package. Install it by following [AMD's documentation](https://rocm.docs.amd.com/projects/radeon/en/latest/docs/install/native_linux/install-onnx.html).
 
-Once `onnxruntime-rocm` is installed and working, install rembg with ROCm support:
+Once `onnxruntime-rocm` is installed and working, install the optional ROCm dependencies:
 
 ```bash
-pip install "rembg[rocm]" # for library
-pip install "rembg[rocm,cli]" # for library + cli
+pip install -e ".[rocm,cli]" 
 ```
 
 ## Usage as a CLI
@@ -183,32 +209,22 @@ rembg p path/to/input path/to/output
 rembg p -w path/to/input path/to/output
 ```
 
-### rembg `s`
+### Web Application (Flask)
 
-Used to start an HTTP server.
+The web UI has been detached from the core CLI for pure modularity. To launch the modern glassmorphic web interface:
 
 ```shell
-rembg s --host 0.0.0.0 --port 7000 --log_level info
+python -m web.app
 ```
 
-For complete API documentation, visit: `http://localhost:7000/api`
+For complete API documentation, visit: `http://localhost:5050`
 
-**Disable the Gradio UI (reduces idle CPU usage):**
+**Clean Up Script:**
 
-```shell
-rembg s --no-ui
-```
-
-**Remove background from an image URL:**
+If you are upgrading from an older version of Rembg and want to remove legacy Gradio setup files:
 
 ```shell
-curl -s "http://localhost:7000/api/remove?url=http://input.png" -o output.png
-```
-
-**Remove background from an uploaded image:**
-
-```shell
-curl -s -F file=@/path/to/input.jpg "http://localhost:7000/api/remove" -o output.png
+python scripts/cleanup.py
 ```
 
 ### rembg `b`
@@ -308,10 +324,8 @@ For more examples, see the [examples](USAGE.md) page.
 
 ### CPU Only
 
-Replace the `rembg` command with `docker run danielgatis/rembg`:
-
 ```shell
-docker run -v .:/data danielgatis/rembg i /data/input.png /data/output.png
+docker run -p 5050:5050 -v .:/data arean82/rembg
 ```
 
 ### NVIDIA CUDA GPU Acceleration
@@ -331,7 +345,7 @@ docker build -t rembg-nvidia-cuda-cudnn-gpu -f Dockerfile_nvidia_cuda_cudnn_gpu 
 **Run the container:**
 
 ```shell
-sudo docker run --rm -it --gpus all -v /dev/dri:/dev/dri -v $PWD:/data rembg-nvidia-cuda-cudnn-gpu i -m birefnet-general /data/input.png /data/output.png
+sudo docker run --rm -it --gpus all -p 5050:5050 -v /dev/dri:/dev/dri -v $PWD:/data rembg-nvidia-cuda-cudnn-gpu
 ```
 
 **Tips:**
@@ -387,9 +401,7 @@ This library depends on [onnxruntime](https://pypi.org/project/onnxruntime). Pyt
 
 ## Support
 
-If you find this project useful, consider buying me a coffee (or a beer):
-
-<a href="https://www.buymeacoffee.com/danielgatis" target="_blank"><img src="https://bmc-cdn.nyc3.digitaloceanspaces.com/BMC-button-images/custom_images/orange_img.png" alt="Buy Me A Coffee" style="height: auto !important;width: auto !important;"></a>
+If you find this project useful, consider sponsoring the project on GitHub.
 
 ## Star History
 

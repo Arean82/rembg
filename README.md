@@ -1,9 +1,9 @@
 <p align="center">
-  <img src="assets/logo.png" alt="Rembg Logo" width="600" />
+  <img src="assets/logo.png" alt="Synora Studio Logo" width="600" />
 </p>
 
 <div align="center">
-  <p align="center">Rembg is a tool to remove image backgrounds. It has a highly modular architecture including a core CLI, a separate Flask Web UI, and is prepared for future desktop apps.</p>
+  <p align="center">Synora Studio BG Remover is a tool to remove image backgrounds. It has a highly modular architecture including a core CLI, a separate Flask Web UI, and is prepared for future desktop apps.</p>
   <div style="display: flex; flex-direction: row; justify-content: center; gap: 8px; flex-wrap: wrap; margin-top: 8px;">
     <a href="https://img.shields.io/badge/License-MIT-blue.svg"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License" /></a>
   </div>
@@ -24,20 +24,65 @@ This project uses an **Absolute Modular Architecture**:
 python: >=3.12
 ```
 
-## Installation
+### Local Installation (Developer Mode)
 
 ```bash
-# Clone the repository
-git clone https://github.com/arean82/rembg
-cd rembg
-
-# Install the modular packages (core, headless, web) globally
+git clone https://github.com/Arean82/synorastudio_bg_remove.git
+cd synorastudio_bg_remove
 pip install -e .
 ```
 
-### Hybrid Microservice Architecture
+#### How to Update
+Because you installed using the `-e` (editable) flag, your Python environment directly links to these folder files. To update to the latest version, you simply pull the newest code—no need to reinstall!
+```bash
+git pull origin main
+```
 
-Rembg now natively supports an **Extensible Provider Pattern**. You can run the ML models locally, or instantly switch the UI/CLI to stream images over the network to a remote GPU server or third-party AI like Ollama!
+#### How to Uninstall
+If you want to remove the tool and its CLI commands from your system:
+```bash
+pip uninstall rembg
+```
+
+### ⚖️ Developer Installation vs. Production Services
+
+You might wonder: *If I just ran `pip install -e .`, why do I need Waitress or Nginx or Systemd Services?*
+
+**`pip install -e .` (Developer Mode)**
+- Perfect for local development, testing, and using the terminal CLI (e.g. `rembg i`).
+- Runs in your active terminal. If you close the terminal, the application dies.
+- Cannot handle thousands of simultaneous web requests (it runs single-threaded by default).
+
+**Systemd Services + WSGI (Production Mode)**
+- Perfect for public-facing websites or 24/7 API servers.
+- Runs invisibly in the background. If your server crashes or reboots, Systemd automatically starts the app back up.
+- Uses tools like Waitress or Gunicorn to spin up dozens of simultaneous worker threads to handle massive traffic without crashing.
+
+**Verdict:** For local testing or CLI usage, `pip install -e .` is all you need. For hosting the web app or API on a server 24/7, you **must** use Systemd Services and WSGI.
+
+### 📦 Building with PyInstaller
+You can compile the separate components into standalone `.exe` files using PyInstaller! I have provided highly optimized `.spec` files for each component:
+
+```bash
+pip install pyinstaller
+
+# Build the Headless API:
+pyinstaller synora-headless-onedir.spec
+pyinstaller synora-headless-onefile.spec
+
+# Build the ML Core Engine:
+pyinstaller synora-core-onedir.spec
+pyinstaller synora-core-onefile.spec
+
+# Build the Web UI:
+pyinstaller synora-web-onedir.spec
+pyinstaller synora-web-onefile.spec
+```
+This generates perfectly bundled portable `.exe` files in your `dist/` folder that require NO python installation!
+
+### 🌐 The New Modular Architecture
+
+Synora Studio BG Remover now natively supports an **Extensible Provider Pattern**. You can run the ML models locally, or instantly switch the UI/CLI to stream images over the network to a remote GPU server or third-party AI like Ollama!
 
 #### 1. Dev/Test (Local Execution)
 
@@ -53,8 +98,8 @@ python -m core.server
 
 Then, on your frontend server, set the `CORE_API_URL` environment variable:
 
-- Windows (PowerShell): `$env:CORE_API_URL="http://your-gpu-server:5001/api/remove"`
-- Linux: `export CORE_API_URL="http://your-gpu-server:5001/api/remove"`
+- Windows (PowerShell): `$env:CORE_API_URL="http://your-gpu-server:5051/api/remove"`
+- Linux: `export CORE_API_URL="http://your-gpu-server:5051/api/remove"`
 
 When you run `headless` or `web`, they will skip loading models and instantly proxy the image over the network!
 

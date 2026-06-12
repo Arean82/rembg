@@ -1,6 +1,6 @@
 import click
 
-from core.bg import download_models
+from core.core_main.bg import download_models
 
 
 @click.command(  # type: ignore

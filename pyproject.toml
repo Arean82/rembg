@@ -1,12 +1,12 @@
 [tool.poetry]
-name = "rembg"
+name = "synorastudio-bg-remove"
 version = "0.0.0"  # Managed by poetry-dynamic-versioning
 description = "Remove image background"
 authors = ["arean82 <arean82@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-homepage = "https://github.com/arean82/rembg"
-repository = "https://github.com/arean82/rembg"
+homepage = "https://github.com/Arean82/synorastudio_bg_remove"
+repository = "https://github.com/Arean82/synorastudio_bg_remove.git"
 keywords = ["remove", "background", "u2net"]
 classifiers = [
     "License :: OSI Approved :: MIT License",
@@ -81,7 +81,7 @@ cli = ["click", "filetype", "Flask", "requests", "watchdog"]
 dev = ["bandit", "black", "flake8", "imagehash", "isort", "mypy", "pytest"]
 
 [tool.poetry.scripts]
-rembg = "headless.cli:main"
+synora = "headless.headless:main"
 
 [build-system]
 requires = ["poetry-core>=1.0.0", "poetry-dynamic-versioning>=1.0.0,<2.0.0"]
@@ -94,4 +94,4 @@ style = "pep440"
 pattern = "^v(?P<base>\\d+\\.\\d+\\.\\d+)"
 
 [tool.poetry-dynamic-versioning.substitution]
-files = ["core/__init__.py"]
+files = ["core/core_main/__init__.py"]

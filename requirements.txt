@@ -14,3 +14,9 @@ filetype>=1.2.0
 Flask>=3.0.0
 requests>=2.31.0
 watchdog>=3.0.0
+
+# Localization & Web UI
+flask-babel>=4.0.0
+Babel>=2.18.0
+deep-translator>=1.11.4
+polib>=1.2.0

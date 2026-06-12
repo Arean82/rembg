@@ -1,40 +1,178 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="glassmorphism" data-mode="dark">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rembg - Background Removal</title>
+    <title>Synora Studio BG Remover</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
+
 <body>
-    <div class="glass-container">
-        <header>
-            <h1>Rembg</h1>
-            <p>Instantly remove image backgrounds</p>
-        </header>
+    <div class="app-container">
+        <!-- Top Toolbar -->
+        <div class="toolbar">
+            <div class="brand">
+                <h1>{{ _('Synora Studio Image Background Remover') }}</h1>
+            </div>
+            <div class="theme-controls">
+                <button id="api-btn" class="toolbar-btn">{{ _('API Docs') }}</button>
+                <button id="webcam-btn" class="toolbar-btn">📷 {{ _('Webcam') }}</button>
 
-        <main>
-            <div id="drop-zone" class="drop-zone">
-                <p>Drag & Drop an image here<br>or <span class="highlight">Click to Upload</span></p>
-                <input type="file" id="file-input" accept="image/png, image/jpeg, image/jpg" hidden>
-            </div>
-            
-            <div id="loading" class="hidden">
-                <div class="spinner"></div>
-                <p>Removing background...</p>
-            </div>
+                <select id="lang-selector" class="dropdown">
+                    <option value="en">EN</option>
+                    <option value="es">ES</option>
+                    <option value="fr">FR</option>
+                    <option value="de">DE</option>
+                    <option value="zh">ZH</option>
+                    <option value="ja">JA</option>
+                </select>
 
-            <div id="result-container" class="hidden">
-                <h2>Result</h2>
-                <img id="result-image" alt="Processed Image">
-                <button id="download-btn" class="glass-btn">Download Image</button>
-                <button id="reset-btn" class="glass-btn secondary">Try Another</button>
+                <select id="theme-selector" class="dropdown">
+                    <option value="glassmorphism">Glassmorphism</option>
+                    <option value="neumorphism">Neumorphism</option>
+                    <option value="claymorphism">Claymorphism</option>
+                    <option value="neobrutalism">Neo-Brutalism</option>
+                </select>
+                <button id="mode-toggle" class="toolbar-btn" title="Toggle Light/Dark Mode">☀️</button>
             </div>
-        </main>
+        </div>
+
+        <div class="main-layout">
+            <!-- Left Sidebar Settings -->
+            <aside class="settings-panel">
+                <div class="control-group">
+                    <label>{{ _('Models') }}</label>
+                    <select id="model" class="dropdown">
+                        <option value="u2net" selected>u2net</option>
+                        <option value="u2netp">u2netp</option>
+                        <option value="u2net_human_seg">u2net_human_seg</option>
+                        <option value="u2net_cloth_seg">u2net_cloth_seg</option>
+                        <option value="silueta">silueta</option>
+                        <option value="isnet-general-use">isnet-general-use</option>
+                        <option value="isnet-anime">isnet-anime</option>
+                        <option value="sam">sam</option>
+                    </select>
+                </div>
+
+                <div class="control-group checkbox-group">
+                    <input type="checkbox" id="a" checked>
+                    <label for="a">{{ _('Alpha matting') }}</label>
+                </div>
+
+                <div class="control-group">
+                    <label>{{ _('Foreground threshold') }}</label>
+                    <div class="slider-row">
+                        <input type="range" id="af-slider" min="0" max="255" value="240">
+                        <input type="number" id="af" value="240" min="0" max="255" class="num-input">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>{{ _('Background threshold') }}</label>
+                    <div class="slider-row">
+                        <input type="range" id="ab-slider" min="0" max="255" value="10">
+                        <input type="number" id="ab" value="10" min="0" max="255" class="num-input">
+                    </div>
+                </div>
+
+                <div class="control-group">
+                    <label>{{ _('Erosion size') }}</label>
+                    <div class="slider-row">
+                        <input type="range" id="ae-slider" min="0" max="255" value="40">
+                        <input type="number" id="ae" value="40" min="0" max="255" class="num-input">
+                    </div>
+                </div>
+
+                <div class="control-group checkbox-group">
+                    <input type="checkbox" id="om">
+                    <label for="om">{{ _('Only mask') }}</label>
+                </div>
+
+                <div class="control-group checkbox-group">
+                    <input type="checkbox" id="ppm" checked>
+                    <label for="ppm">{{ _('Post process mask') }}</label>
+                </div>
+                
+                <div class="control-group checkbox-group">
+                    <input type="checkbox" id="grayscale">
+                    <label for="grayscale">{{ _('Convert to Grayscale') }}</label>
+                </div>
+
+                <div class="control-group">
+                    <label>{{ _('Arguments (JSON)') }}</label>
+                    <input type="text" id="extras" class="text-input" placeholder='{"key": "value"}'>
+                </div>
+            </aside>
+
+            <!-- Right Content Area -->
+            <main class="content-panel">
+                <div id="drop-zone" class="drop-zone">
+                    <video id="webcam-video" autoplay playsinline style="display:none;"></video>
+                    <canvas id="webcam-canvas" style="display:none;"></canvas>
+                    <p id="drop-text">{{ _('Drag & Drop image') }}<br>{{ _('Paste (CTRL+V)') }}<br>{{ _('or') }} <span
+                            class="highlight">{{ _('Click') }}</span></p>
+                    <input type="file" id="file-input" accept="image/png, image/jpeg, image/jpg" hidden>
+                </div>
+
+                <div id="loading" class="hidden">
+                    <div class="spinner"></div>
+                    <p>{{ _('Processing...') }}</p>
+                </div>
+
+                <div id="result-container" class="hidden">
+                    <img id="result-image" alt="Processed Image">
+                    <div class="action-buttons">
+                        <button id="download-btn" class="btn primary">{{ _('Download Image') }}</button>
+                    </div>
+                </div>
+
+                <div class="action-buttons main-actions">
+                    <button id="clear-btn" class="btn secondary">{{ _('Clear') }}</button>
+                    <button id="submit-btn" class="btn primary">{{ _('Submit') }}</button>
+                </div>
+            </main>
+        </div>
     </div>
+
+    <!-- API Modal -->
+    <div id="api-modal" class="modal hidden">
+        <div class="modal-content">
+            <h2>{{ _('API Documentation') }}</h2>
+            <p>{{ _('The dedicated API server runs on port 5052.') }}</p>
+            <pre><code>
+# cURL Example
+curl -X POST "http://localhost:5052/api/remove" \
+  -H "accept: image/png" \
+  -H "Content-Type: multipart/form-data" \
+  -F "file=@your_image.jpg" \
+  -F "model=u2net" \
+  -F "a=true" \
+  -o result.png
+            </code></pre>
+            <button id="close-modal" class="btn secondary">{{ _('Close') }}</button>
+        </div>
+    </div>
+
+    <!-- Inject Flask-Babel Translations into JavaScript -->
+    <script>
+        const TRANSLATIONS = {
+            "Snap Photo": "{{ _('📸 Snap Photo') }}",
+            "Webcam": "{{ _('📷 Webcam') }}",
+            "WebcamReady": "{{ _('Webcam Photo Ready!') }}",
+            "Pasted": "{{ _('Pasted:') }}",
+            "Selected": "{{ _('Selected:') }}",
+            "DragDrop": "{{ _('Drag & Drop image') }}<br>{{ _('Paste (CTRL+V)') }}<br>{{ _('or') }} <span class='highlight'>{{ _('Click') }}</span>",
+            "SelectError": "{{ _('Please select, paste, or take an image first.') }}",
+            "WebcamError": "{{ _('Could not access webcam:') }}",
+            "Error": "{{ _('Error:') }}"
+        };
+    </script>
+
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
+
 </html>

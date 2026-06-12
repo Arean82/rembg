@@ -9,9 +9,9 @@ from tqdm import tqdm
 from watchdog.events import FileSystemEvent, FileSystemEventHandler
 from watchdog.observers import Observer
 
-from core.bg import remove
-from core.session_factory import new_session
-from core.sessions import sessions_names
+from core.core_main.bg import remove
+from core.core_main.session_factory import new_session
+from core.core_main.sessions import sessions_names
 
 
 @click.command(  # type: ignore

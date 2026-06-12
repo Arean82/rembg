@@ -12,7 +12,10 @@ FILES_TO_DELETE = [
     "tests",
     "rembg.py",
     "scripts/run_web.py",
-    "scripts/run_headless.py"
+    "scripts/run_headless.py",
+    "api",
+    "headless/app.py",
+    "headless/cli.py"
 ]
 
 # 2. Folders to create
@@ -40,6 +43,62 @@ def replace_in_file(filepath, search, replace):
     content = content.replace(search, replace)
     with open(filepath, 'w', encoding='utf-8') as file:
         file.write(content)
+
+def restructure_core_web():
+    print("\nMigrating Core and Web to Single-File Root Architecture...")
+    
+    # Core Migration
+    core_main = os.path.join(ROOT_DIR, "core", "core_main")
+    os.makedirs(core_main, exist_ok=True)
+    
+    core_files_to_move = ["bg.py", "server.py", "session_factory.py", "sessions", "__init__.py"]
+    for f in core_files_to_move:
+        src = os.path.join(ROOT_DIR, "core", f)
+        dest = os.path.join(core_main, f)
+        if os.path.exists(src) and not os.path.exists(dest):
+            try:
+                shutil.move(src, dest)
+                print(f"Moved {src} to {dest}")
+            except Exception as e:
+                print(f"Error moving {src}: {e}")
+
+    # Web Migration
+    web_main = os.path.join(ROOT_DIR, "web", "web_main")
+    os.makedirs(web_main, exist_ok=True)
+
+    web_files_to_move = ["app.py", "i18n.py"]
+    for f in web_files_to_move:
+        src = os.path.join(ROOT_DIR, "web", f)
+        dest = os.path.join(web_main, f)
+        if os.path.exists(src) and not os.path.exists(dest):
+            try:
+                shutil.move(src, dest)
+                print(f"Moved {src} to {dest}")
+            except Exception as e:
+                print(f"Error moving {src}: {e}")
+
+    print("Fixing Internal Imports Across Extracted Modules...")
+    
+    # 1. Update headless/hl_main/app.py
+    hl_app = os.path.join(ROOT_DIR, "headless", "hl_main", "app.py")
+    replace_in_file(hl_app, "from core.bg import remove", "from core.core_main.bg import remove")
+    replace_in_file(hl_app, "from core.session_factory", "from core.core_main.session_factory")
+    replace_in_file(hl_app, "from core.sessions", "from core.core_main.sessions")
+
+    # 2. Update web/web_main/app.py
+    web_app_path = os.path.join(web_main, "app.py")
+    replace_in_file(web_app_path, "from web.i18n", "from web.web_main.i18n")
+    replace_in_file(web_app_path, "from core.bg", "from core.core_main.bg")
+
+    # 3. Update headless commands (they import from core!)
+    commands_dir = os.path.join(ROOT_DIR, "headless", "commands")
+    if os.path.exists(commands_dir):
+        for filename in os.listdir(commands_dir):
+            if filename.endswith(".py"):
+                filepath = os.path.join(commands_dir, filename)
+                replace_in_file(filepath, "from core.bg", "from core.core_main.bg")
+                replace_in_file(filepath, "from core.session_factory", "from core.core_main.session_factory")
+                replace_in_file(filepath, "from core.sessions", "from core.core_main.sessions")
 
 def cleanup():
     print("Starting Extreme MVC Restructuring...")
@@ -131,6 +190,7 @@ def cleanup():
                 replace_in_file(filepath, "from ..session_factory", "from core.session_factory")
                 replace_in_file(filepath, "from ..sessions", "from core.sessions")
                 
+    restructure_core_web()
     print("\nExtreme MVC Restructuring Complete!")
 
 if __name__ == "__main__":

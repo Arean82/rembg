@@ -4,13 +4,15 @@ The **Core Engine** is the deeply optimized, highly scalable ML backend that pow
 
 ---
 
-## Production Deployment (Linux)
+## 🚀 Production Deployment
 
-To ensure the Core Engine stays alive in production, starts on boot, and automatically restarts if it crashes, you must deploy it as a Linux `systemd` service.
+There are two primary ways to deploy the engine in production: using a Standard Python Virtual Environment, or using a Compiled PyInstaller Binary.
 
-### 1. Create the Systemd Service
-Create a new file at `/etc/systemd/system/synora-bg-remove-core.service`:
+### Method A: Standard Python Deployment (Linux Systemd)
+If you are running the raw Python code on a Linux server, you should use `systemd` to keep it alive forever.
 
+#### 1. Create the Systemd Service
+Create `/etc/systemd/system/synora-bg-remove-core.service`:
 ```ini
 [Unit]
 Description=Synora Studio Core ML Engine
@@ -18,9 +20,8 @@ After=network.target
 
 [Service]
 User=ubuntu
-WorkingDirectory=/path/to/rembg
-# Replace with the path to your python binary or virtual environment
-ExecStart=/path/to/venv/bin/python core/server.py
+WorkingDirectory=/var/www/synorastudio_bg_remove
+ExecStart=/var/www/synorastudio_bg_remove/venv/bin/python core/core.py
 Restart=always
 RestartSec=3
 
@@ -28,19 +29,40 @@ RestartSec=3
 WantedBy=multi-user.target
 ```
 
-### 2. Enable and Start the Service
-Reload the system daemon to detect the new file, then enable and start the engine:
-
+#### 2. Enable and Start
 ```bash
 sudo systemctl daemon-reload
 sudo systemctl enable synora-bg-remove-core
 sudo systemctl start synora-bg-remove-core
+sudo journalctl -u synora-bg-remove-core -f
 ```
 
-### 3. Check Status
-You can monitor the ML engine logs in real-time by running:
+### Method B: PyInstaller Standalone Binary Deployment
+If you don't want to deal with Python environments on your production server, you can compile the engine into a standalone binary.
+
+#### 1. Build the Binary
 ```bash
-sudo journalctl -u synora-bg-remove-core -f
+pip install pyinstaller
+# For a single portable file:
+pyinstaller synora-core-onefile.spec
+# For a faster, uncompressed folder:
+pyinstaller synora-core-onedir.spec
+```
+
+#### 2. Deploy as a Linux Systemd Service
+Create the exact same `systemd` service as Method A, but change the `ExecStart` path to point directly to your compiled binary:
+```ini
+ExecStart=/var/www/synorastudio_bg_remove/dist/synora-core-onefile/synora-core-onefile_rmbg
+```
+
+#### 3. Deploy as a Windows Background Service (NSSM)
+If you are deploying on Windows and want it to run invisibly in the background across reboots, use [NSSM](http://nssm.cc/):
+1. Download NSSM and extract it.
+2. Open Administrator PowerShell and run:
+```powershell
+nssm install SynoraCore "C:\path\to\dist\synora-core-onefile\synora-core-onefile_rmbg.exe"
+nssm set SynoraCore AppDirectory "C:\path\to\dist\synora-core-onefile"
+nssm start SynoraCore
 ```
 
 ---
@@ -80,20 +102,7 @@ If you want to completely remove the app and its dependencies from your python e
 pip uninstall synorastudio-bg-remove
 ```
 
-### 📦 Building with PyInstaller
-You can compile the Core Engine into a standalone `.exe` using PyInstaller. I have included a highly optimized `.spec` file that automatically bundles all necessary invisible background dependencies!
 
-To build it:
-```bash
-pip install pyinstaller
-
-# For a single portable .exe file:
-pyinstaller synora-core-onefile.spec
-
-# For a faster, uncompressed folder containing the .exe:
-pyinstaller synora-core-onedir.spec
-```
-This generates a perfectly bundled portable `.exe` in your `dist/` folder that requires NO python installation!
 
 ### ⚖️ Developer Installation vs. Production Services
 **`pip install -e .` (Developer Mode)**

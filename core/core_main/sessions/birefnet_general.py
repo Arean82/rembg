@@ -1,3 +1,8 @@
+# ==================================================================
+# File: core/core_main/sessions/birefnet_general.py
+# Description: 
+# ==================================================================
+
 import os
 from typing import List
 

@@ -1,3 +1,8 @@
+# ==================================================================
+# File: core/core_main/sessions/bria_rmbg.py
+# Description: 
+# ==================================================================
+
 import os
 from typing import List
 

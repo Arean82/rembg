@@ -1,3 +1,8 @@
+# ==================================================================
+# File: core/core_main/sessions/birefnet_general_lite.py
+# Description: 
+# ==================================================================
+
 import os
 
 import pooch

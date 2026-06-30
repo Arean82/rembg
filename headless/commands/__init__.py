@@ -1,3 +1,8 @@
+# ==================================================================
+# File: headless/commands/__init__.py
+# Description: 
+# ==================================================================
+
 command_functions = []
 
 from .b_command import b_command

@@ -1,3 +1,8 @@
+# ==================================================================
+# File: headless/hl_main/cli.py
+# Description: 
+# ==================================================================
+
 import sys
 
 # Fast path for --version (avoid importing heavy dependencies)

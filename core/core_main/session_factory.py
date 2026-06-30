@@ -1,3 +1,8 @@
+# ==================================================================
+# File: core/core_main/session_factory.py
+# Description: 
+# ==================================================================
+
 import os
 from typing import Optional, Type
 

@@ -1,3 +1,8 @@
+# ==================================================================
+# File: web/web_main/app.py
+# Description: 
+# ==================================================================
+
 import os
 import io
 import requests
@@ -6,8 +11,26 @@ from flask import Flask, request, jsonify, send_file, render_template
 from web.web_main.i18n import init_i18n
 from PIL import Image
 
+from opentelemetry import trace
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.instrumentation.flask import FlaskInstrumentor
+from opentelemetry.instrumentation.requests import RequestsInstrumentor
+
 app = Flask(__name__)
 init_i18n(app)
+
+# Initialize OpenTelemetry for Jaeger (OTLP)
+resource = Resource(attributes={"service.name": "synora-web-ui"})
+provider = TracerProvider(resource=resource)
+processor = BatchSpanProcessor(OTLPSpanExporter(endpoint="http://localhost:4317", insecure=True))
+provider.add_span_processor(processor)
+trace.set_tracer_provider(provider)
+
+FlaskInstrumentor().instrument_app(app)
+RequestsInstrumentor().instrument()
 
 # Extensible Provider Configuration
 # AI_PROVIDER can be 'core', 'ollama', or 'custom'

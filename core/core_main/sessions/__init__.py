@@ -1,3 +1,8 @@
+# ==================================================================
+# File: core/core_main/sessions/__init__.py
+# Description: 
+# ==================================================================
+
 from __future__ import annotations
 
 from typing import Dict, List

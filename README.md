@@ -24,6 +24,29 @@ This project uses an **Absolute Modular Architecture**:
 python: >=3.12
 ```
 
+### Ubuntu Manual Installation (Beginner Level)
+
+If you are on Ubuntu, follow these step-by-step instructions to get everything running manually from scratch:
+
+```bash
+# 1. Update your system packages
+sudo apt update && sudo apt upgrade -y
+
+# 2. Install Python, pip, and git
+sudo apt install python3.12 python3.12-venv python3-pip git -y
+
+# 3. Clone the repository
+git clone https://github.com/Arean82/synorastudio_bg_remove.git
+cd synorastudio_bg_remove
+
+# 4. Create and activate a virtual environment (Recommended to avoid system conflicts)
+python3.12 -m venv venv
+source venv/bin/activate
+
+# 5. Install the application and all dependencies (including Swagger & Telemetry)
+pip install -e .
+```
+
 ### Local Installation (Developer Mode)
 
 ```bash
@@ -93,7 +116,7 @@ By default, if you don't set any environment variables, `web` and `headless` wil
 Deploy the heavy `core/` to your GPU server and run its dedicated API:
 
 ```bash
-python -m core.server
+python -m core.core
 ```
 
 Then, on your frontend server, set the `CORE_API_URL` environment variable:
@@ -102,6 +125,13 @@ Then, on your frontend server, set the `CORE_API_URL` environment variable:
 - Linux: `export CORE_API_URL="http://your-gpu-server:5051/api/remove"`
 
 When you run `headless` or `web`, they will skip loading models and instantly proxy the image over the network!
+
+### 📊 API Documentation & Distributed Tracing (Jaeger)
+
+This project has built-in support for **Swagger** and **OpenTelemetry**.
+
+- **Swagger UI**: Once you start the Core ML Engine, you can view the interactive API documentation and test endpoints directly by visiting `http://localhost:5051/apidocs/`.
+- **OpenTelemetry (Jaeger)**: All modules (`core`, `web`, and `headless`) are instrumented to automatically emit traces via OTLP to `localhost:4317`. If you run a local Jaeger instance, you will see full distributed traces of your requests moving from the Web UI, over the network, into the Core ML engine!
 
 #### 3. Third-Party AI Providers (Ollama)
 
@@ -236,10 +266,10 @@ rembg p -w path/to/input path/to/output
 The web UI has been detached from the core CLI for pure modularity. To launch the modern glassmorphic web interface:
 
 ```shell
-python -m web.app
+python -m web.web
 ```
 
-For complete API documentation, visit: `http://localhost:5050`
+For complete API documentation, start the Core engine and visit: `http://localhost:5051/apidocs/`
 
 **Clean Up Script:**
 

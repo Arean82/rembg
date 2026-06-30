@@ -1,3 +1,8 @@
+# ==================================================================
+# File: headless/commands/d_command.py
+# Description: 
+# ==================================================================
+
 import click
 
 from core.core_main.bg import download_models

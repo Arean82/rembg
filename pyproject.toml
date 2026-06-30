@@ -38,6 +38,11 @@ pymatting = "^1.1.14"
 scikit-image = "^0.26.0"
 scipy = "^1.16.3"
 tqdm = "^4.67.1"
+flasgger = "^0.9.7.1"
+opentelemetry-distro = "*"
+opentelemetry-exporter-otlp = "*"
+opentelemetry-instrumentation-flask = "*"
+opentelemetry-instrumentation-requests = "*"
 
 # CPU backend (optional)
 onnxruntime = {version = "^1.23.2", optional = true}

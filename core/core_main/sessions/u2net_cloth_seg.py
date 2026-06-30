@@ -1,3 +1,8 @@
+# ==================================================================
+# File: core/core_main/sessions/u2net_cloth_seg.py
+# Description: 
+# ==================================================================
+
 import os
 from typing import List
 

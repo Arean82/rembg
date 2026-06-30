@@ -1,3 +1,8 @@
+# ==================================================================
+# File: core/core_main/sessions/base.py
+# Description: 
+# ==================================================================
+
 import os
 from typing import Dict, List, Tuple
 

@@ -1,3 +1,8 @@
+# ==================================================================
+# File: scripts/generate_specs.py
+# Description: 
+# ==================================================================
+
 import os
 
 def create_spec(component_name, entry_point, hidden_imports, datas, build_type):

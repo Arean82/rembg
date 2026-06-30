@@ -1,3 +1,8 @@
+# ==================================================================
+# File: headless/commands/b_command.py
+# Description: 
+# ==================================================================
+
 import asyncio
 import io
 import json

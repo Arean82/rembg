@@ -1,3 +1,8 @@
+# ==================================================================
+# File: web/web_main/i18n.py
+# Description: 
+# ==================================================================
+
 from flask import request
 from flask_babel import Babel
 

@@ -1,3 +1,8 @@
+# ==================================================================
+# File: core/core_main/__init__.py
+# Description: 
+# ==================================================================
+
 try:
     from importlib.metadata import PackageNotFoundError, version
 

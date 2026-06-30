@@ -1,3 +1,8 @@
+# ==================================================================
+# File: core/core_main/sessions/birefnet_portrait.py
+# Description: 
+# ==================================================================
+
 import os
 
 import pooch

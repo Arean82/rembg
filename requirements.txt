@@ -20,3 +20,10 @@ flask-babel>=4.0.0
 Babel>=2.18.0
 deep-translator>=1.11.4
 polib>=1.2.0
+
+# API Documentation & Telemetry
+flasgger>=0.9.7.1
+opentelemetry-distro
+opentelemetry-exporter-otlp
+opentelemetry-instrumentation-flask
+opentelemetry-instrumentation-requests

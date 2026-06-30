@@ -1,3 +1,8 @@
+# ==================================================================
+# File: headless/commands/i_command.py
+# Description: 
+# ==================================================================
+
 import json
 import pathlib
 import sys
@@ -11,6 +16,22 @@ from core.core_main.sessions import sessions_names
 import os
 import requests
 import base64
+
+from opentelemetry import trace
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.instrumentation.requests import RequestsInstrumentor
+
+# Initialize OpenTelemetry for Jaeger (OTLP)
+resource = Resource(attributes={"service.name": "synora-headless-cli"})
+provider = TracerProvider(resource=resource)
+processor = BatchSpanProcessor(OTLPSpanExporter(endpoint="http://localhost:4317", insecure=True))
+provider.add_span_processor(processor)
+trace.set_tracer_provider(provider)
+
+RequestsInstrumentor().instrument()
 
 AI_PROVIDER = os.environ.get("AI_PROVIDER", "core").lower()
 CORE_API_URL = os.environ.get("CORE_API_URL", "")

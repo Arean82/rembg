@@ -1,3 +1,8 @@
+# ==================================================================
+# File: scripts/generate_locales.py
+# Description: 
+# ==================================================================
+
 import os
 import subprocess
 import sys

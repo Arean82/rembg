@@ -1,11 +1,37 @@
+# ==================================================================
+# File: core/core_main/server.py
+# Description: 
+# ==================================================================
+
 from flask import Flask, request, jsonify, send_file
 import io
 import logging
+
+from flasgger import Swagger
+from opentelemetry import trace
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.instrumentation.flask import FlaskInstrumentor
 
 # Ensure this script runs independently using its own package scope
 from .bg import remove
 
 app = Flask(__name__)
+
+# Initialize Swagger
+swagger = Swagger(app)
+
+# Initialize OpenTelemetry for Jaeger (OTLP)
+resource = Resource(attributes={"service.name": "synora-core-api"})
+provider = TracerProvider(resource=resource)
+# Jaeger's default OTLP gRPC port is 4317
+processor = BatchSpanProcessor(OTLPSpanExporter(endpoint="http://localhost:4317", insecure=True))
+provider.add_span_processor(processor)
+trace.set_tracer_provider(provider)
+
+FlaskInstrumentor().instrument_app(app)
 
 # Reduce Flask logging spam
 log = logging.getLogger('werkzeug')
@@ -13,6 +39,40 @@ log.setLevel(logging.ERROR)
 
 @app.route("/api/remove", methods=["POST"])
 def remove_background():
+    """
+    Remove background from an image.
+    ---
+    consumes:
+      - multipart/form-data
+    parameters:
+      - in: formData
+        name: file
+        type: file
+        required: true
+        description: The image file to process.
+      - in: formData
+        name: model
+        type: string
+        required: false
+        description: The ML model to use (e.g., u2net).
+      - in: formData
+        name: a
+        type: boolean
+        required: false
+        description: Apply alpha matting.
+    responses:
+      200:
+        description: The image with the background removed.
+        content:
+          image/png:
+            schema:
+              type: string
+              format: binary
+      400:
+        description: Invalid request.
+      500:
+        description: Internal server error.
+    """
     if "file" not in request.files:
         return jsonify({"error": "No file provided"}), 400
     

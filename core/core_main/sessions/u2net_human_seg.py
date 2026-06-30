@@ -1,3 +1,8 @@
+# ==================================================================
+# File: core/core_main/sessions/u2net_human_seg.py
+# Description: 
+# ==================================================================
+
 import os
 from typing import List
 

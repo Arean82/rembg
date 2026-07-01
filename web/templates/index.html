@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Synora Studio BG Remover</title>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
@@ -43,7 +44,12 @@
 
         <div class="main-layout">
             <!-- Left Sidebar Settings -->
-            <aside class="settings-panel">
+            <aside class="settings-panel" {% if not is_logged_in %}style="opacity: 0.5; pointer-events: none;" title="{{ _('Advanced settings are restricted to logged-in users') }}"{% endif %}>
+                {% if not is_logged_in %}
+                <div class="guest-notice" style="color: #ffaa00; margin-bottom: 15px; font-weight: bold; text-align: center;">
+                    ⚠️ {{ _('Advanced Settings Locked (Guest)') }}
+                </div>
+                {% endif %}
                 <div class="control-group">
                     <label>{{ _('Models') }}</label>
                     <select id="model" class="dropdown">

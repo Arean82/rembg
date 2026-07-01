@@ -1,18 +1,22 @@
 # -*- mode: python ; coding: utf-8 -*-
-import os
 
 block_cipher = None
 
 a = Analysis(
-    ['headless/headless.py'],
+    ['app.py'],
     pathex=[],
     binaries=[],
-    datas=[],
+    datas=[
+        ('web/templates', 'web/templates'),
+        ('web/static', 'web/static'),
+        ('config.ini', '.')
+    ],
     hiddenimports=[
-        'headless',
-        'headless.hl_main.app',
-        'headless.hl_main.cli',
-        'uvicorn'
+        'core.core_main.bg',
+        'core.core_main.db',
+        'core.core_main.scheduler',
+        'flasgger',
+        'opentelemetry'
     ],
     hookspath=[],
     hooksconfig={},
@@ -25,13 +29,12 @@ a = Analysis(
 )
 pyz = PYZ(a.pure, a.zipped_data, cipher=block_cipher)
 
-
 exe = EXE(
     pyz,
     a.scripts,
     [],
     exclude_binaries=True,
-    name='synora-headless-onedir_rmbg',
+    name='synora-app',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
@@ -51,5 +54,5 @@ coll = COLLECT(
     strip=False,
     upx=True,
     upx_exclude=[],
-    name='synora-headless-onedir'
+    name='synora-app',
 )

@@ -36,7 +36,7 @@ swagger = Swagger(app)
 config = get_config()
 otlp_endpoint = config.get('Telemetry', 'otlp_endpoint', fallback='http://localhost:4317')
 
-resource = Resource(attributes={"service.name": "synora-unified-api"})
+resource = Resource(attributes={"service.name": "synora-bg-remove"})
 provider = TracerProvider(resource=resource)
 processor = BatchSpanProcessor(OTLPSpanExporter(endpoint=otlp_endpoint, insecure=True))
 provider.add_span_processor(processor)
@@ -53,9 +53,10 @@ log.setLevel(logging.ERROR)
 # -----------------------------------------
 @app.route("/")
 def index():
-    # Pass the dev flag to the UI to lock/unlock advanced features
-    dev_is_logged_in = config.getboolean('Dev', 'simulate_logged_in_user', fallback=False)
-    return render_template("index.html", is_logged_in=dev_is_logged_in)
+    # Check Nginx SSO header to lock/unlock advanced features
+    sso_user = request.headers.get("X-Forwarded-User")
+    is_logged_in = bool(sso_user)
+    return render_template("index.html", is_logged_in=is_logged_in)
 
 # -----------------------------------------
 # API Routes (ML Backend)
@@ -87,8 +88,9 @@ def remove_background():
     try:
         input_data = file.read()
         
-        # Check dev simulation flag to determine tier
-        is_logged_in = config.getboolean('Dev', 'simulate_logged_in_user', fallback=False)
+        # Check Nginx SSO header to determine tier
+        sso_user = request.headers.get("X-Forwarded-User")
+        is_logged_in = bool(sso_user)
         
         kwargs = {}
         
